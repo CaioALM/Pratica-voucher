@@ -61,6 +61,38 @@ describe('Unit test of voucher', () => {
       expect(voucherRepository.createVoucher).not.toBeCalled();
   });
 
+  it('Should apply discount', async () => {
+    
+    const newVoucher = {
+      code: "teste",
+      discount: 10
+    }
+
+    jest
+      .spyOn(voucherRepository, 'getVoucherByCode')
+      .mockImplementationOnce((): any => {
+        return {
+        id: 1,
+        code: newVoucher.code, 
+        discount: newVoucher.discount,
+        used: false
+        }
+      });
+
+    jest
+      .spyOn(voucherRepository, 'useVoucher')
+      .mockImplementationOnce((): any => {})
+
+      const amount = 5000;
+      const result = await voucherFactory.applyDiscount(amount, newVoucher.discount);
+      const order = await voucherService.applyVoucher(newVoucher.code, amount)
+
+
+      expect(order.amount).toBe(amount)
+      expect(order.discount).toBe(newVoucher.discount)
+      expect(order.finalAmount).toBe(result);
+  });
+
   
 });
 
